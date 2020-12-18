@@ -11,7 +11,7 @@ namespace WebApplication1.Service
     public interface IJobService
     {
         Task<IEnumerable<Heytour>> GetJobsList(JobsFilterParameters parameters);
-         Task<Heytour> GetJobById(int jobId);
+        Task<Heytour> GetJobById(int jobId);
     }
     //构造函数注入常用于在服务构建上定义和获取服务依赖。如下
     //或者用于声明和获取服务对服务构造的依赖关系
@@ -29,32 +29,28 @@ namespace WebApplication1.Service
         //然后在 GetJobsList方法内部使用这个依赖
         public async Task<IEnumerable<Heytour>> GetJobsList(JobsFilterParameters parameters)
         {
-            if (parameters.IsActive.HasValue) {
-                var jobs = await Task.Run(() => _jobRepo.GetJobs().Where(x => x.IsActive == parameters.IsActive).ToList());
-                return jobs;
-            }
-            else if (!parameters.IsActive.HasValue)
-            {
-                if(parameters.PostedOn != null)
-                {
-                    var jobs = await Task.Run(() => _jobRepo.GetJobs().Where(x => x.PostedOn == parameters.PostedOn).ToList());
-                    return jobs;
-                }
-                else
-                {
-                    var jobs = await Task.Run(() => _jobRepo.GetJobs().ToList());
-                    return jobs;
-                }
+            IEnumerable<Heytour> jobs = null;
 
+
+            var joblist = _jobRepo.GetJobs();
+            if (parameters.IsActive.HasValue)
+            {
+                jobs = joblist.Where(m => m.IsActive == parameters.IsActive.Value).ToList();
             }
-            
+            else
+            {
+                jobs = joblist;
+            }
+
+            return jobs;
+
         }
 
 
         public async Task<Heytour> GetJobById(int jobId)
         {
-            var job = await Task.Run(() => _jobRepo.GetJobs().First(x => x.Id == jobId));
-            
+            var job = await Task.Run(() => _jobRepo.GetJobs().FirstOrDefault(x => x.Id == jobId));
+
             return job;
         }
 
